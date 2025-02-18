@@ -5,14 +5,14 @@
 
 - Answer: Git lưu trữ lưu trữ ảnh chụp (snapshot) của toàn bộ dự án tại mỗi commit, không lưu các file dưới dạng từng phiên bản riêng biệt. Dữ liệu này được lưu trong thư mục .git và bao gồm 4 đối tượng chính:
     + Blob (Binary Large Object): 1 blob sẽ lưu trữ nội dung 1 file dưới dạng SHA-1.
-    + Tree: biểu diễn cấu trúc thư mục, lưu trữ danh sách các blob và các tree con.
+    + Tree: biểu diễn cấu trúc thư mục, lưu trữ danh sách các blob và các tree con và còn lưu cả quyền truy cập file.
     + Commit: 1 commit trỏ đến 1 tree và tham chiếu đến commit cha.
     + Tag: gắn nhãn, đánh dấu phiên bản cho 1 commit.
 
 2. Khi ta di chuyển giữa các commit, Git làm gì dưới lớp vỏ bọc của nó? HEAD thực chất là gì và nó tác động thế nào đến trạng thái hiện tại của repository?
 
 - Answer: 
-   + Khi di chuyển giữa các commit, Git sẽ thực hiện thay đổi trạng thái của HEAD.
+   + Khi di chuyển giữa các commit, Git sẽ thực hiện thay đổi trạng thái của HEAD, nhưng ko thay đổi lịch sử commit.
    + HEAD là 1 pointer trỏ đến commit hiện tại đang làm việc, thường là trỏ đến nhánh hiện tại.
    + Ví dụ: git checkout <branch> thì từ nhánh hiện tại HEAD sẽ trỏ đến nhánh chỉ định.
 
@@ -25,6 +25,8 @@
   --> Nếu 2 nhánh thay đổi các file khác nhau, Git có thể tự dộng hợp nhất --> Ko xảy ra conflict.
   
   --> Nếu 2 nhánh thay đổi cùng một dòng code trong cùng một file, Git ko thể quyết định giữ cái nào và bỏ phần nào --> xảy ra conflict.
+  
+  --> Merge chỉ gây conflict nếu cả 2 nhánh cùng thay đổi trên cùng 1 dòng hoặc cùng 1 vùng trong cùng 1 file. Nếu thay đổi ở vị trí khác nhau thì git sẽ tự động merge.
 
 4. Khi ta thêm file vào staging area, thực chất Git làm gì? Điều gì thực sự thay đổi khi ta chạy lệnh git commit?
 
@@ -105,11 +107,22 @@
     
   --> Có thể gây mất dữ liệu vì sau khi chạy git reset --hard <commit>, tất cả commit sau <commit> sẽ bị xóa khỏi nhánh.
 
+  - git reset --soft <commit>:
+    + chỉ di chuyển HEAD, giữ nguyên staging area và working directory.
+    
+  --> Không mất dữ liệu vì những commit sau đó bị bỏ đi khỏi lịch sử nhưng thay đổi vẫn còn trong staging area.
+
+  - git reset --mixed <commit>:
+    + di chuyển HEAD và reset staging area, nhưng giữ nguyên working directory.
+  
+  --> Không mất dữ liệu vì các thay đổi vẫn còn trong working directory, nhưng bị unstage (phải git add lại nếu muốn commit).
+
   - git revert <commit>: 
     + Tạo một commit mới để đảo ngược thay đổi, không làm mất lịch sử.
     
   --> git revert không gây mất dữ liệu vì nó không xóa commit, mà chỉ tạo thêm commit mới để hủy bỏ các thay đổi.
 
+  - Nếu commit đã được push, cần dùng git push -f (--force) để cập nhật nhưng có thể gây mất lịch sử nếu làm sai.
 
 10. Khi dùng git commit --amend, Git thực sự làm gì? Nó có chỉnh sửa commit cũ không, hay tạo ra một commit hoàn toàn mới?
 
