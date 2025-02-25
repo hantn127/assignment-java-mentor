@@ -11,7 +11,7 @@
 
 2. Khi ta di chuyển giữa các commit, Git làm gì dưới lớp vỏ bọc của nó? HEAD thực chất là gì và nó tác động thế nào đến trạng thái hiện tại của repository?
 
-- Answer: 
+- Answer:
    + Khi di chuyển giữa các commit, Git sẽ thực hiện thay đổi trạng thái của HEAD, nhưng ko thay đổi lịch sử commit.
    + HEAD là 1 pointer trỏ đến commit hiện tại đang làm việc, thường là trỏ đến nhánh hiện tại.
    + Ví dụ: git checkout <branch> thì từ nhánh hiện tại HEAD sẽ trỏ đến nhánh chỉ định.
@@ -27,6 +27,7 @@
   --> Nếu 2 nhánh thay đổi cùng một dòng code trong cùng một file, Git ko thể quyết định giữ cái nào và bỏ phần nào --> xảy ra conflict.
   
   --> Merge chỉ gây conflict nếu cả 2 nhánh cùng thay đổi trên cùng 1 dòng hoặc cùng 1 vùng trong cùng 1 file. Nếu thay đổi ở vị trí khác nhau thì git sẽ tự động merge.
+
 
 4. Khi ta thêm file vào staging area, thực chất Git làm gì? Điều gì thực sự thay đổi khi ta chạy lệnh git commit?
 
@@ -123,6 +124,7 @@
   --> git revert không gây mất dữ liệu vì nó không xóa commit, mà chỉ tạo thêm commit mới để hủy bỏ các thay đổi.
 
   - Nếu commit đã được push, cần dùng git push -f (--force) để cập nhật nhưng có thể gây mất lịch sử nếu làm sai.
+
 
 10. Khi dùng git commit --amend, Git thực sự làm gì? Nó có chỉnh sửa commit cũ không, hay tạo ra một commit hoàn toàn mới?
 
