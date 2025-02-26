@@ -1,24 +1,26 @@
 package model;
 
-public class EWallet extends PaymentMethod {
-    private static final double DAILY_LIMIT = 5000;
+import java.math.BigDecimal;
 
-    public EWallet(String methodId, String methodName,  double balance) {
+public class EWallet extends PaymentMethod {
+    private static final BigDecimal DAILY_LIMIT = BigDecimal.valueOf(5000);
+
+    public EWallet(String methodId, String methodName,  BigDecimal balance) {
         super(methodId, methodName, balance);
     }
 
     @Override
-    public boolean processPayment(double amount, boolean isForeignTransaction) {
-        if (amount > DAILY_LIMIT || amount > balance) {
+    public boolean processPayment(BigDecimal amount, boolean isForeignTransaction) {
+        if (amount.compareTo(DAILY_LIMIT) > 0 || amount.compareTo(balance) > 0) {
             return false;
         }
-        balance -= amount;
+        balance = balance.subtract(amount);
         return true;
     }
 
     @Override
-    public boolean processRefund(double amount) {
-        balance += amount;
+    public boolean processRefund(BigDecimal amount) {
+        balance = balance.add(amount);
         return true;
     }
 }

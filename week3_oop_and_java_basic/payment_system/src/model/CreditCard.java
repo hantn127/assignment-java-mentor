@@ -1,47 +1,49 @@
 package model;
 
-public class CreditCard extends PaymentMethod {
-    private double creditLimit;
-    private double foreignTransactionFee = 0.02;
+import java.math.BigDecimal;
 
-    public CreditCard(String methodId, String methodName, double balance, double creditLimit, double foreignTransactionFee) {
+public class CreditCard extends PaymentMethod {
+    private BigDecimal creditLimit;
+    private BigDecimal foreignTransactionFee = BigDecimal.valueOf(0.02);
+
+    public CreditCard(String methodId, String methodName, BigDecimal balance, BigDecimal creditLimit, BigDecimal foreignTransactionFee) {
         super(methodId, methodName, balance);
         this.creditLimit = creditLimit;
         this.foreignTransactionFee = foreignTransactionFee;
     }
 
     @Override
-    public boolean processPayment(double amount, boolean isForeignTransaction) {
-        double totalAmount = amount;
+    public boolean processPayment(BigDecimal amount, boolean isForeignTransaction) {
+        BigDecimal totalAmount = amount;
         if (isForeignTransaction) {
-            totalAmount += amount * foreignTransactionFee;
+            totalAmount = totalAmount.add(amount.multiply(foreignTransactionFee));
         }
-        if (totalAmount > (balance + creditLimit)) {
+        if (totalAmount.compareTo(balance.add(creditLimit)) > 0) {
             return false;
         }
-        balance -= totalAmount;
+        balance = balance.subtract(totalAmount);
         return true;
     }
 
     @Override
-    public boolean processRefund(double amount) {
-        balance += amount;
+    public boolean processRefund(BigDecimal amount) {
+        balance = balance.add(amount);
         return true;
     }
 
-    public double getCreditLimit() {
+    public BigDecimal getCreditLimit() {
         return creditLimit;
     }
 
-    public void setCreditLimit(double creditLimit) {
+    public void setCreditLimit(BigDecimal creditLimit) {
         this.creditLimit = creditLimit;
     }
 
-    public double getForeignTransactionFee() {
+    public BigDecimal getForeignTransactionFee() {
         return foreignTransactionFee;
     }
 
-    public void setForeignTransactionFee(double foreignTransactionFee) {
+    public void setForeignTransactionFee(BigDecimal foreignTransactionFee) {
         this.foreignTransactionFee = foreignTransactionFee;
     }
 }

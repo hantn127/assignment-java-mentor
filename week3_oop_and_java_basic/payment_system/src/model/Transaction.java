@@ -1,5 +1,6 @@
 package model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Transaction {
@@ -7,11 +8,11 @@ public class Transaction {
     private User user;
     private PaymentMethod paymentMethod;
     private String transactionType;
-    private double amount;
+    private BigDecimal amount;
     private Date date;
     private boolean isSuccessful;
 
-    public Transaction(String transactionId, User user, PaymentMethod paymentMethod, String transactionType, double amount, Date date, boolean isSuccessful) {
+    public Transaction(String transactionId, User user, PaymentMethod paymentMethod, String transactionType, BigDecimal amount, Date date, boolean isSuccessful) {
         this.transactionId = transactionId;
         this.user = user;
         this.paymentMethod = paymentMethod;
@@ -53,11 +54,11 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

@@ -2,6 +2,7 @@ package model;
 
 import constance.UserStatus;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class User {
@@ -9,12 +10,12 @@ public class User {
     private String username;
     private String password;
     private UserStatus status;
-    private double balance;
+    private BigDecimal balance;
     private List<PaymentMethod> paymentMethods;
     private int failedLoginAttempts;
     private int failedOtpAttempts;
 
-    public User(String userId, String username, String password, UserStatus status, double balance, List<PaymentMethod> paymentMethods, int failedLoginAttempts, int failedOtpAttempts) {
+    public User(String userId, String username, String password, UserStatus status, BigDecimal balance, List<PaymentMethod> paymentMethods, int failedLoginAttempts, int failedOtpAttempts) {
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -57,11 +58,11 @@ public class User {
         this.status = status;
     }
 
-    public double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 
