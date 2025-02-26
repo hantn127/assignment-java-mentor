@@ -28,7 +28,6 @@
   
   --> Merge chỉ gây conflict nếu cả 2 nhánh cùng thay đổi trên cùng 1 dòng hoặc cùng 1 vùng trong cùng 1 file. Nếu thay đổi ở vị trí khác nhau thì git sẽ tự động merge.
 
-
 4. Khi ta thêm file vào staging area, thực chất Git làm gì? Điều gì thực sự thay đổi khi ta chạy lệnh git commit?
 
 - Answer:
