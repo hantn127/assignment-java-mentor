@@ -3,7 +3,6 @@ package model;
 import constance.UserStatus;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public class User {
     private String userId;
@@ -11,19 +10,19 @@ public class User {
     private String password;
     private UserStatus status;
     private BigDecimal balance;
-    private List<PaymentMethod> paymentMethods;
+//    private List<PaymentMethod> paymentMethods;
     private int failedLoginAttempts;
     private int failedOtpAttempts;
 
-    public User(String userId, String username, String password, UserStatus status, BigDecimal balance, List<PaymentMethod> paymentMethods, int failedLoginAttempts, int failedOtpAttempts) {
+    public User(String userId, String username, String password, UserStatus status, BigDecimal balance, int failedLoginAttempts, int failedOtpAttempts) {
         this.userId = userId;
         this.username = username;
         this.password = password;
         this.status = status;
         this.balance = balance;
-        this.paymentMethods = paymentMethods;
         this.failedLoginAttempts = failedLoginAttempts;
         this.failedOtpAttempts = failedOtpAttempts;
+//        this.paymentMethods = paymentMethods;
     }
 
     public String getUserId() {
@@ -66,13 +65,13 @@ public class User {
         this.balance = balance;
     }
 
-    public List<PaymentMethod> getPaymentMethods() {
-        return paymentMethods;
-    }
-
-    public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
-        this.paymentMethods = paymentMethods;
-    }
+//    public List<PaymentMethod> getPaymentMethods() {
+//        return paymentMethods;
+//    }
+//
+//    public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
+//        this.paymentMethods = paymentMethods;
+//    }
 
     public int getFailedLoginAttempts() {
         return failedLoginAttempts;

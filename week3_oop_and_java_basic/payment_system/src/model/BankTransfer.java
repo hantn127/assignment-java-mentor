@@ -8,8 +8,12 @@ public class BankTransfer extends PaymentMethod {
     private static final int HOLD_DAYS = 3;
     private boolean isOnHold = false;
 
-    public BankTransfer(String methodId, String methodName, BigDecimal balance) {
-        super(methodId, methodName, balance);
+    public BankTransfer(String methodId, String methodName, String userId, BigDecimal balance) {
+        super(methodId, methodName, userId, balance);
+    }
+
+    public BankTransfer(boolean isOnHold) {
+        this.isOnHold = isOnHold;
     }
 
     @Override

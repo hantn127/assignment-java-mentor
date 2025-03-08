@@ -3,13 +3,14 @@ package model;
 import java.math.BigDecimal;
 
 public class CreditCard extends PaymentMethod {
-    private BigDecimal creditLimit;
-    private BigDecimal foreignTransactionFee = BigDecimal.valueOf(0.02);
+    private static final BigDecimal creditLimit = new BigDecimal(5000);
+    private static final BigDecimal foreignTransactionFee = new BigDecimal(0.02);
 
-    public CreditCard(String methodId, String methodName, BigDecimal balance, BigDecimal creditLimit, BigDecimal foreignTransactionFee) {
-        super(methodId, methodName, balance);
-        this.creditLimit = creditLimit;
-        this.foreignTransactionFee = foreignTransactionFee;
+    public CreditCard(String methodId, String methodName, String userId, BigDecimal balance) {
+        super(methodId, methodName, userId, balance);
+    }
+
+    public CreditCard() {
     }
 
     @Override
@@ -29,21 +30,5 @@ public class CreditCard extends PaymentMethod {
     public boolean processRefund(BigDecimal amount) {
         balance = balance.add(amount);
         return true;
-    }
-
-    public BigDecimal getCreditLimit() {
-        return creditLimit;
-    }
-
-    public void setCreditLimit(BigDecimal creditLimit) {
-        this.creditLimit = creditLimit;
-    }
-
-    public BigDecimal getForeignTransactionFee() {
-        return foreignTransactionFee;
-    }
-
-    public void setForeignTransactionFee(BigDecimal foreignTransactionFee) {
-        this.foreignTransactionFee = foreignTransactionFee;
     }
 }

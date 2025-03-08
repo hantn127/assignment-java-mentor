@@ -5,21 +5,21 @@ import java.util.Date;
 
 public class Transaction {
     private String transactionId;
-    private User user;
-    private PaymentMethod paymentMethod;
+    private String userId;
+    private String paymentMethod;
     private String transactionType;
     private BigDecimal amount;
     private Date date;
-    private boolean isSuccessful;
+    private String status;
 
-    public Transaction(String transactionId, User user, PaymentMethod paymentMethod, String transactionType, BigDecimal amount, Date date, boolean isSuccessful) {
+    public Transaction(String transactionId, String userId, String paymentMethod, String transactionType, BigDecimal amount, Date date, String status) {
         this.transactionId = transactionId;
-        this.user = user;
+        this.userId = userId;
         this.paymentMethod = paymentMethod;
         this.transactionType = transactionType;
         this.amount = amount;
         this.date = date;
-        this.isSuccessful = isSuccessful;
+        this.status = status;
     }
 
     public String getTransactionId() {
@@ -30,19 +30,19 @@ public class Transaction {
         this.transactionId = transactionId;
     }
 
-    public User getUser() {
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public PaymentMethod getPaymentMethod() {
+    public String getPaymentMethod() {
         return paymentMethod;
     }
 
-    public void setPaymentMethod(PaymentMethod paymentMethod) {
+    public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
@@ -70,11 +70,18 @@ public class Transaction {
         this.date = date;
     }
 
-    public boolean isSuccessful() {
-        return isSuccessful;
+    public String getStatus() {
+        return status;
     }
 
-    public void setSuccessful(boolean successful) {
-        isSuccessful = successful;
+    public void setStatus(String status) {
+        this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Mã GD: %s | Phương thức: %s | Loại: %s | Số tiền: %.2f | Ngày: %s | Trạng thái: %s",
+                transactionId, paymentMethod, transactionType, amount, date, status);
+    }
+
 }

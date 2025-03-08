@@ -5,8 +5,11 @@ import java.math.BigDecimal;
 public class EWallet extends PaymentMethod {
     private static final BigDecimal DAILY_LIMIT = BigDecimal.valueOf(5000);
 
-    public EWallet(String methodId, String methodName,  BigDecimal balance) {
-        super(methodId, methodName, balance);
+    public EWallet(String methodId, String methodName, String userId, BigDecimal balance) {
+        super(methodId, methodName, userId, balance);
+    }
+
+    public EWallet() {
     }
 
     @Override
