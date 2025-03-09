@@ -11,22 +11,21 @@
     - Dùng khi không cần thứ tự của phần tử và chỉ quan tâm đến sự khác biệt trong phần tử.
     
   - LinkedHashSet:
-    - Đảm bảo thứ tự thêm vào của các phần tử (đúng theo thứ tự insertion). 
+    - Đảm bảo thứ tự thêm vào của các phần tử (insertion). 
     - Tương tự HashSet nhưng duy trì một danh sách liên kết các phần tử. 
     - Tìm kiếm chậm hơn HashSet một chút, nhưng đảm bảo thứ tự.
     - Dùng khi cần thứ tự của các phần tử nhưng không cần sắp xếp theo giá trị.
     
   - TreeSet:
     - Duy trì phần tử theo thứ tự tăng dần (hoặc giảm dần nếu có Comparator). 
-    - Dựa trên Red-Black Tree (cây tìm kiếm nhị phân tự cân bằng). 
-    - Dùng khi cần sắp xếp phần tử. 
+    - Dựa trên Red-Black Tree (cây tìm kiếm nhị phân tự cân bằng).
     - Dùng Khi cần các phần tử được sắp xếp hoặc cần kiểm tra phần tử theo giá trị. 
 
 2. Làm thế nào để HashSet đảm bảo các phần tử không trùng lặp?
 
 - Answer:
   - HashSet sử dụng hàm băm (hashing) để xác định vị trí của mỗi phần tử trong bộ nhớ. Mỗi phần tử có một giá trị băm độc nhất. 
-  - Khi thêm phần tử mới vào, HashSet kiểm tra xem đã có phần tử nào có giá trị băm giống với phần tử mới chưa. Nếu có, phần tử không được thêm vào, đảm bảo sự không trùng lặp. 
+  - Khi thêm phần tử mới vào, HashSet kiểm tra xem đã có phần tử nào có giá trị băm giống với phần tử mới chưa. Nếu có, phần tử không được thêm vào, để tránh trùng lặp. 
   - equals() và hashCode() được sử dụng để xác định sự trùng lặp giữa các phần tử.
 
 3. Sự khác biệt giữa HashMap, LinkedHashMap và TreeMap? Trong trường hợp nào thì nên dùng cái nào?
@@ -44,7 +43,7 @@
     - Dùng khi cần duy trì thứ tự thêm vào và không cần sắp xếp theo key.
     
   - TreeMap:
-    - Duy trì thứ tự sắp xếp tự nhiên của các key (hoặc theo Comparator nếu được cung cấp).
+    - Duy trì thứ tự sắp xếp tự nhiên của các key.
     - Dùng Red-Black Tree để tổ chức các cặp key-value.
     - Tìm kiếm chậm hơn HashMap do cần phải duy trì thứ tự sắp xếp.
     - Dùng khi cần các cặp key-value được sắp xếp theo thứ tự của key. 
@@ -52,7 +51,7 @@
 4. Từ sau Java 8, HashMap xử lý collisions như thế nào?
 
 - Answer:
-  - Từ Java 8 trở đi, HashMap sử dụng cấu trúc LinkedList hoặc TreeNode (cây nhị phân) để xử lý các collisions (trùng lặp băm) khi số lượng phần tử trong một bucket vượt quá một ngưỡng nhất định (thường là 8). 
+  - Từ Java 8 trở đi, HashMap sử dụng cấu trúc LinkedList hoặc TreeNode để xử lý các collisions khi số lượng phần tử trong một bucket vượt quá một ngưỡng nhất định. 
   - Nếu số phần tử trong một bucket vượt quá 8, HashMap sẽ chuyển từ LinkedList sang Red-Black Tree, giúp tăng tốc độ tìm kiếm từ O(n) xuống O(log n). 
 
 5. Tại sao String và Integer thường được dùng làm key trong HashMap?
@@ -80,6 +79,5 @@
 8. B-Tree là gì? Được sử dụng như thế nào?
 - Answer:
   - B-Tree là một loại cây tìm kiếm tự cân bằng, thường được sử dụng trong các hệ thống lưu trữ dữ liệu ngoài bộ nhớ (như cơ sở dữ liệu).
-  - B-Tree được tối ưu hóa cho việc truy cập dữ liệu từ các thiết bị ngoại vi (như đĩa cứng), giúp giảm thiểu số lượng lần truy cập đĩa.
-  - Mỗi nút trong B-Tree có thể có nhiều con (không giống như cây nhị phân), và có thể lưu trữ nhiều phần tử trong mỗi nút.
+  - Mỗi nút trong B-Tree có thể có nhiều con, và có thể lưu trữ nhiều phần tử trong mỗi nút.
   - Sử dụng trong các hệ quản trị cơ sở dữ liệu (DBMS), hệ thống tệp tin, và các ứng dụng yêu cầu hiệu suất truy vấn cao.
