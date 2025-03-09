@@ -117,15 +117,8 @@ public class TransactionServiceImpl implements TransactionService {
         return transactions;
     }
 
-
     public void displayFinancialReport(String userId) {
         boolean isBusinessAccount = true;
-
-//        List<Transaction> transactions = getTransactions(userId);
-//        if (transactions.isEmpty()) {
-//            System.out.println("No transactions available to display.");
-//            return;
-//        }
 
         displayTotalAmountByPaymentMethod(userId, "SUCCESS");
 
@@ -156,7 +149,6 @@ public class TransactionServiceImpl implements TransactionService {
             System.out.printf(" - %s: %.2f\n", entry.getKey(), entry.getValue());
         }
     }
-
 
     private void displayTransactionStatusCount(String userId) {
         List<Transaction> transactions = getTransactionsByUserId(userId);

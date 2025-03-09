@@ -20,7 +20,6 @@ public class PaymentApplication {
     private static final TransactionService transactionService = new TransactionServiceImpl();
 
     public static void main(String[] args) {
-        System.out.println(System.getProperty("user.dir"));
         User currentUser = null;
 
         while (true) {

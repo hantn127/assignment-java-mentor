@@ -65,23 +65,6 @@ public class RefundServiceImpl implements RefundService {
         return null;
     }
 
-//    private int showRefundableTransactions(List<Transaction> refundableTransactions) {
-//        System.out.println("Danh sách giao dịch có thể hoàn tiền:");
-//        for (int i = 0; i < refundableTransactions.size(); i++) {
-//            Transaction transaction = refundableTransactions.get(i);
-//            System.out.println(i + 1 + ". " + transaction);
-//        }
-//
-//        System.out.print("Chọn giao dịch cần hoàn tiền (nhập số thứ tự): ");
-//        int choice = scanner.nextInt();
-//
-//        if (choice > 0 && choice <= refundableTransactions.size()) {
-//            return choice - 1;
-//        } else {
-//            return -1;
-//        }
-//    }
-
     private int showRefundableTransactions(List<Transaction> refundableTransactions) {
         System.out.println("Danh sách giao dịch có thể hoàn tiền:");
         for (int i = 0; i < refundableTransactions.size(); i++) {

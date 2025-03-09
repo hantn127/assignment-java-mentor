@@ -28,7 +28,6 @@ public class PaymentServiceImpl implements PaymentService {
                 return;
             }
         }
-
         // Random
         if (isFraudulentTransaction(userId, amount)) {
             System.out.println("Giao dịch có dấu hiệu gian lận. Giao dịch này đã bị chặn, yêu cầu xác minh qua call center.");
@@ -194,8 +193,6 @@ public class PaymentServiceImpl implements PaymentService {
         }
         return "PM" + String.format("%03d", maxId + 1);
     }
-
-
 
     private BigDecimal getUserInputAmount() {
         Scanner scanner = new Scanner(System.in);
