@@ -1,3 +1,3 @@
-U001,johndoe,pass123,ACTIVE,10000.50,0,0
+U001,johndoe,pass891,ACTIVE,10000.50,0,0
 U002,janedoe,pass456,SUSPENDED,500.75,2,1
 U003,miketest,pass789,BANNED,0.00,5,3

@@ -66,7 +66,7 @@ public class PaymentApplication {
                     transactionService.displayFinancialReport(userId);
                     break;
                 case "4":
-
+                    showAccountSettingsMenu(userId);
                     break;
                 case "5":
                     confirmLogout();
@@ -85,5 +85,43 @@ public class PaymentApplication {
         if (confirmation.equals("y")) {
             userService.logout();
         }
+    }
+
+    private static void showAccountSettingsMenu(String userId) {
+        Scanner sc = new Scanner(System.in);
+        int choice;
+
+        do {
+            System.out.println("\n===== CÀI ĐẶT TÀI KHOẢN =====");
+            System.out.println("1. Thay đổi mật khẩu");
+            System.out.println("2. Thêm phương thức thanh toán mới");
+            System.out.println("3. Xóa phương thức thanh toán");
+            System.out.println("4. Xem thông tin bảo mật tài khoản");
+            System.out.println("5. Quay lại menu chính");
+            System.out.print("Chọn một tùy chọn: ");
+
+            choice = sc.nextInt();
+            sc.nextLine(); // Xử lý dòng new line
+
+            switch (choice) {
+                case 1:
+                    userService.changePassword(userId);
+                    break;
+                case 2:
+                    paymentService.addPaymentMethod(userId);
+                    break;
+                case 3:
+                    paymentService.removePaymentMethod(userId);
+                    break;
+                case 4:
+                    userService.viewSecurityInfo(userId);
+                    break;
+                case 5:
+                    System.out.println("Quay lại menu chính...\n");
+                    break;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ. Vui lòng chọn lại.");
+            }
+        } while (choice != 5);
     }
 }

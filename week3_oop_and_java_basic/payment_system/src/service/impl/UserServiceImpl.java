@@ -9,15 +9,13 @@ import constance.UserStatus;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UserServiceImpl implements UserService {
     private final Map<String, User> users = new HashMap<>();
     private static final int MAX_FAILED_LOGIN_ATTEMPTS = 3;
     private static final String USER_FILE = "week3_oop_and_java_basic/payment_system/src/data/users.txt";
+    private static final Scanner scanner = new Scanner(System.in);
 
     @Override
     public User login(String username, String password) {
@@ -97,7 +95,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changePassword(String userId, String oldPassword, String newPassword) {
+    public boolean changePassword(String userId) {
+        String oldPassword = getOldPassword();
+        String newPassword = getNewPassword();
 
         User user = getUserById(userId);
 
@@ -105,6 +105,7 @@ public class UserServiceImpl implements UserService {
             if (newPassword.length() >= 6) {
                 user.setPassword(newPassword);
                 updateUserInFile(user);
+                System.out.println("Mật khẩu đã được thay đổi thành công.");
                 return true;
             } else {
                 System.out.println("Mật khẩu mới phải có ít nhất 6 ký tự.");
@@ -113,6 +114,16 @@ public class UserServiceImpl implements UserService {
             System.out.println("Mật khẩu cũ không chính xác.");
         }
         return false;
+    }
+
+    private String getOldPassword() {
+        System.out.print("Nhập mật khẩu cũ: ");
+        return scanner.next();
+    }
+
+    private String getNewPassword() {
+        System.out.print("Nhập mật khẩu mới: ");
+        return scanner.next();
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.util.*;
 
 public class PaymentServiceImpl implements PaymentService {
     private static final String PAYMENT_METHOD_FILE = "week3_oop_and_java_basic/payment_system/src/data/payment_methods.txt";
+    private static final String TRANSACTION_FILE = "week3_oop_and_java_basic/payment_system/src/data/transactions.txt";
     private static final String TRANSACTION_TYPE = "Payment";
     private static final Scanner scanner = new Scanner(System.in);
 
@@ -43,32 +44,51 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    private String getPaymentMethod() {
+        System.out.print("Nhập phương thức thanh toán bạn muốn thêm mới hoặc xóa: ");
+        return scanner.nextLine().trim();
+    }
+
+    private BigDecimal getBalanceInput() {
+        System.out.print("Nhập số dư cho phương thức thanh toán: ");
+        while (!scanner.hasNextBigDecimal()) {
+            System.out.println("Số dư không hợp lệ. Vui lòng nhập lại.");
+            scanner.next();
+        }
+        return scanner.nextBigDecimal();
+    }
+
     @Override
-    public boolean addPaymentMethod(String userId, PaymentMethod paymentMethod) {
+    public boolean addPaymentMethod(String userId) {
+        String paymentMethod = getPaymentMethod();
+
         if (isPaymentMethodExist(userId, paymentMethod)) {
             System.out.println("Phương thức thanh toán đã tồn tại.");
             return false;
         }
 
-        savePaymentMethod(userId, paymentMethod); // Lưu vào file
+        BigDecimal balance = getBalanceInput();
+
+        savePaymentMethod(userId, paymentMethod, balance);
         System.out.println("Phương thức thanh toán đã được thêm thành công.");
         return true;
     }
 
     @Override
-    public boolean removePaymentMethod(String userId, String paymentMethodId) {
-        if (isPendingTransaction(userId, paymentMethodId)) {
+    public boolean removePaymentMethod(String userId) {
+        String paymentMethod = getPaymentMethod();
+
+        if (isPendingTransaction(userId, paymentMethod)) {
             System.out.println("Không thể xóa phương thức thanh toán, có giao dịch đang chờ xử lý.");
             return false;
         }
 
-        deletePaymentMethod(userId, paymentMethodId);
-        System.out.println("Phương thức thanh toán đã được xóa thành công.");
+        deletePaymentMethod(userId, paymentMethod);
         return true;
     }
 
-    private boolean isPendingTransaction(String userId, String paymentMethodType) {
-        try (BufferedReader reader = new BufferedReader(new FileReader("transactions.txt"))) {
+    private boolean isPendingTransaction(String userId, String paymentMethod) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -77,7 +97,7 @@ public class PaymentServiceImpl implements PaymentService {
                     String transactionMethod = parts[2];
                     String status = parts[6];
 
-                    if (transactionUserId.equals(userId) && transactionMethod.equals(paymentMethodType)
+                    if (transactionUserId.equals(userId) && transactionMethod.equals(paymentMethod)
                             && status.equals("FAILED")) {
                         return true;
                     }
@@ -89,9 +109,9 @@ public class PaymentServiceImpl implements PaymentService {
         return false;
     }
 
-    private void deletePaymentMethod(String userId, String paymentMethodType) {
-        File inputFile = new File("payment_methods.txt");
-        File tempFile = new File("payment_methods_temp.txt");
+    private void deletePaymentMethod(String userId, String paymentMethod) {
+        File inputFile = new File(PAYMENT_METHOD_FILE);
+        File tempFile = new File(inputFile.getAbsolutePath() + "_temp");
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
              BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
@@ -103,7 +123,7 @@ public class PaymentServiceImpl implements PaymentService {
                     String existingUserId = parts[2];
                     String existingMethod = parts[1];
 
-                    if (existingUserId.equals(userId) && existingMethod.equals(paymentMethodType)) {
+                    if (existingUserId.equals(userId) && existingMethod.equals(paymentMethod)) {
                         continue;
                     }
                 }
@@ -115,17 +135,20 @@ public class PaymentServiceImpl implements PaymentService {
             return;
         }
 
-        // Đổi tên file tạm thành file gốc
+        // Đổi tên tệp tạm thành tệp gốc
         if (!inputFile.delete()) {
             System.out.println("Lỗi khi xóa file cũ.");
             return;
         }
+
         if (!tempFile.renameTo(inputFile)) {
             System.out.println("Lỗi khi đổi tên file mới.");
+        } else {
+            System.out.println("Phương thức thanh toán đã được xóa thành công.");
         }
     }
 
-    private boolean isPaymentMethodExist(String userId, PaymentMethod paymentMethod) {
+    private boolean isPaymentMethodExist(String userId, String paymentMethod) {
         try (BufferedReader reader = new BufferedReader(new FileReader(PAYMENT_METHOD_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -134,7 +157,7 @@ public class PaymentServiceImpl implements PaymentService {
                     String existingUserId = parts[2];
                     String existingMethod = parts[1];
 
-                    if (existingUserId.equals(userId) && existingMethod.equals(paymentMethod.getMethodName())) {
+                    if (existingUserId.equals(userId) && existingMethod.equals(paymentMethod)) {
                         return true;
                     }
                 }
@@ -145,10 +168,10 @@ public class PaymentServiceImpl implements PaymentService {
         return false;
     }
 
-    private void savePaymentMethod(String userId, PaymentMethod paymentMethod) {
+    private void savePaymentMethod(String userId, String paymentMethod, BigDecimal balance) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(PAYMENT_METHOD_FILE, true))) {
             String newId = generatePaymentMethodId(); // Tạo ID mới
-            writer.write(newId + "," + paymentMethod.getMethodName() + "," + userId + "," + paymentMethod.getBalance());
+            writer.write(newId + "," + paymentMethod + "," + userId + "," + balance);
             writer.newLine();
         } catch (IOException e) {
             System.out.println("Lỗi khi ghi file: " + e.getMessage());
