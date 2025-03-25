@@ -86,7 +86,33 @@ public class TransactionServiceImpl implements TransactionService {
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
+        return refundableTransactions;
+    }
 
+    private List<Transaction> getTransactionsByUserAndStatus(String userId, String status) {
+        List<Transaction> refundableTransactions = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date currentDate = new Date();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] transactionData = line.split(",");
+                String transactionId = transactionData[0];
+                String user = transactionData[1];
+                String paymentMethod = transactionData[2];
+                String transactionType = transactionData[3];
+                BigDecimal amount = new BigDecimal(transactionData[4]);
+                Date transactionDate = dateFormat.parse(transactionData[5]);
+                String fileStatus = transactionData[6];
+
+                if (user.equals(userId) && fileStatus.equals(status)) {
+                    refundableTransactions.add(new Transaction(transactionId, user, paymentMethod, transactionType, amount, transactionDate, fileStatus));
+                }
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
         return refundableTransactions;
     }
 
@@ -135,7 +161,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void displayTotalAmountByPaymentMethod(String userId, String status) {
-        List<Transaction> transactions = getTransactions(userId, status);
+        List<Transaction> transactions = getTransactionsByUserAndStatus(userId, status);
 
         Map<String, BigDecimal> totalAmountByMethod = new HashMap<>();
         for (Transaction t : transactions) {
@@ -162,7 +188,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private void displaySuspiciousTransactions(String userId, String status) {
-        List<Transaction> transactions = getTransactions(userId, status);
+        List<Transaction> transactions = getTransactionsByUserAndStatus(userId, status);
 
         List<Transaction> suspiciousTransactions = transactions.stream()
                 .filter(t -> "SUSPICIOUS".equals(t.getStatus()))

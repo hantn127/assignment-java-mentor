@@ -10,6 +10,7 @@ import service.impl.RefundServiceImpl;
 import service.impl.TransactionServiceImpl;
 import service.impl.UserServiceImpl;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class PaymentApplication {
@@ -87,7 +88,6 @@ public class PaymentApplication {
     }
 
     private static void showAccountSettingsMenu(String userId) {
-        Scanner sc = new Scanner(System.in);
         int choice;
 
         do {
@@ -97,10 +97,18 @@ public class PaymentApplication {
             System.out.println("3. Xóa phương thức thanh toán");
             System.out.println("4. Xem thông tin bảo mật tài khoản");
             System.out.println("5. Quay lại menu chính");
-            System.out.print("Chọn một tùy chọn: ");
 
-            choice = sc.nextInt();
-            sc.nextLine(); // Xử lý dòng new line
+            while (true) {
+                System.out.print("Chọn một tùy chọn: ");
+                try {
+                    choice = sc.nextInt();
+                    sc.nextLine();
+                    break;
+                } catch (InputMismatchException e) {
+                    System.out.println("Vui lòng nhập một số nguyên hợp lệ!");
+                    sc.nextLine();
+                }
+            }
 
             switch (choice) {
                 case 1:

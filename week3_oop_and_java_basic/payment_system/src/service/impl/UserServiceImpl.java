@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
             if (user != null) {
                 user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
                 handleFailedLogin(user);
+                updateUserInFile(user);
             } else {
                 System.out.println("Tài khoản không tồn tại.");
             }
@@ -135,11 +136,10 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateUserInFile(User updatedUser) {
-        List<User> users = readUsersFromFile(); // Đọc danh sách user từ file
+        List<User> users = readUsersFromFile();
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(USER_FILE))) {
             for (User user : users) {
-                // Nếu là user cần cập nhật thì thay bằng updatedUser
                 if (user.getUserId().equals(updatedUser.getUserId())) {
                     user = updatedUser;
                 }

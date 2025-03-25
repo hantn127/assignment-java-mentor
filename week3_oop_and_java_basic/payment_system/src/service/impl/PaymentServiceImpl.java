@@ -81,8 +81,11 @@ public class PaymentServiceImpl implements PaymentService {
             System.out.println("Không thể xóa phương thức thanh toán, có giao dịch đang chờ xử lý.");
             return false;
         }
-
-        deletePaymentMethod(userId, paymentMethod);
+        if (isPaymentMethodExist(userId, paymentMethod)) {
+            deletePaymentMethod(userId, paymentMethod);
+        } else {
+            System.out.println("Phương thức thanh toán này không tồn tại!");
+        }
         return true;
     }
 
@@ -134,7 +137,6 @@ public class PaymentServiceImpl implements PaymentService {
             return;
         }
 
-        // Đổi tên tệp tạm thành tệp gốc
         if (!inputFile.delete()) {
             System.out.println("Lỗi khi xóa file cũ.");
             return;
