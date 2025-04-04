@@ -7,12 +7,14 @@ public abstract class PaymentMethod {
     protected String methodName;
     protected String userId;
     protected BigDecimal balance;
+    protected BigDecimal lastBalance;
 
     public PaymentMethod(String methodId, String methodName, String userId, BigDecimal balance) {
         this.methodId = methodId;
         this.methodName = methodName;
         this.userId = userId;
         this.balance = balance;
+        this.lastBalance = balance;
     }
 
     public PaymentMethod() {}
@@ -52,4 +54,8 @@ public abstract class PaymentMethod {
     public abstract boolean processPayment(BigDecimal amount, boolean isForeignTransaction);
     public abstract boolean processRefund(BigDecimal amount);
 
+    public void rollbackLastTransaction() {
+        System.out.println("Rollback giao dịch cho phương thức: " + methodName);
+        this.balance = lastBalance;
+    }
 }

@@ -22,6 +22,7 @@ public class CreditCard extends PaymentMethod {
         if (totalAmount.compareTo(balance.add(creditLimit)) > 0) {
             return false;
         }
+        lastBalance = balance;
         balance = balance.subtract(totalAmount);
         return true;
     }

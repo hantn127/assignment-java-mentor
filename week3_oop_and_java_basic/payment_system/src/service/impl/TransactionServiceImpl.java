@@ -58,89 +58,141 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    public List<Transaction> getTransactions(String userId, String status) {
-        List<Transaction> refundableTransactions = new ArrayList<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date currentDate = new Date();
+    @Override
+    public void saveTransactions(List<String> transactionLogs) {
+        if (transactionLogs.isEmpty()) return;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] transactionData = line.split(",");
-                String transactionId = transactionData[0];
-                String user = transactionData[1];
-                String paymentMethod = transactionData[2];
-                String transactionType = transactionData[3];
-                BigDecimal amount = new BigDecimal(transactionData[4]);
-                Date transactionDate = dateFormat.parse(transactionData[5]);
-                String fileStatus = transactionData[6];
+        File file = new File(TRANSACTION_FILE);
+        List<String> existingLines = new ArrayList<>();
+        int newTransactionId = 1;
 
-                if (user.equals(userId) && fileStatus.equals(status)) {
-                    long diffInMillies = Math.abs(currentDate.getTime() - transactionDate.getTime());
-                    long diffDays = diffInMillies / (1000 * 60 * 60 * 24);
-                    if (diffDays <= 7) {
-                        refundableTransactions.add(new Transaction(transactionId, user, paymentMethod, transactionType, amount, transactionDate, fileStatus));
+        if (file.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    existingLines.add(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            if (!existingLines.isEmpty()) {
+                String lastLine = existingLines.get(existingLines.size() - 1);
+                if (lastLine.startsWith("T")) {
+                    String lastTransactionNumber = lastLine.split(",")[0].substring(1);
+                    try {
+                        newTransactionId = Integer.parseInt(lastTransactionNumber) + 1;
+                    } catch (NumberFormatException e) {
+                        System.err.println("Lỗi phân tích ID giao dịch. Đặt về 1.");
                     }
                 }
             }
-        } catch (IOException | ParseException e) {
+        }
+
+        // Ghi lại dữ liệu vào file mà không tạo dòng trống cuối
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
+            for (int i = 0; i < existingLines.size(); i++) {
+                writer.write(existingLines.get(i));
+                if (i < existingLines.size() - 1 || !transactionLogs.isEmpty()) {
+                    writer.newLine();
+                }
+            }
+
+            for (int i = 0; i < transactionLogs.size(); i++) {
+                String newTransaction = String.format("T%03d,%s", newTransactionId++, transactionLogs.get(i));
+                writer.write(newTransaction);
+                if (i < transactionLogs.size() - 1) {
+                    writer.newLine();
+                }
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return refundableTransactions;
     }
 
-    private List<Transaction> getTransactionsByUserAndStatus(String userId, String status) {
-        List<Transaction> refundableTransactions = new ArrayList<>();
+    public List<Transaction> getTransactions(String userId, String status) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date currentDate = new Date();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] transactionData = line.split(",");
-                String transactionId = transactionData[0];
-                String user = transactionData[1];
-                String paymentMethod = transactionData[2];
-                String transactionType = transactionData[3];
-                BigDecimal amount = new BigDecimal(transactionData[4]);
-                Date transactionDate = dateFormat.parse(transactionData[5]);
-                String fileStatus = transactionData[6];
-
-                if (user.equals(userId) && fileStatus.equals(status)) {
-                    refundableTransactions.add(new Transaction(transactionId, user, paymentMethod, transactionType, amount, transactionDate, fileStatus));
-                }
-            }
-        } catch (IOException | ParseException e) {
+            return reader.lines()
+                    .map(line -> line.split(","))
+                    .filter(transactionData -> transactionData[1].equals(userId) && transactionData[6].equals(status)) // Filter by userId and status
+                    .map(transactionData -> {
+                        try {
+                            Date transactionDate = dateFormat.parse(transactionData[5]);
+                            BigDecimal amount = new BigDecimal(transactionData[4]);
+                            return new Transaction(transactionData[0], transactionData[1], transactionData[2],
+                                    transactionData[3], amount, transactionDate, transactionData[6]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .filter(t -> {
+                        long diffInMillies = Math.abs(currentDate.getTime() - t.getDate().getTime());
+                        long diffDays = diffInMillies / (1000 * 60 * 60 * 24);
+                        return diffDays <= 7;
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return refundableTransactions;
+        return Collections.emptyList();
     }
 
-    private List<Transaction> getTransactionsByUserId(String userId) {
-        List<Transaction> transactions = new ArrayList<>();
+    private List<Transaction> getTransactionsByUserAndStatus(String userId, String status) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] transactionData = line.split(",");
-                String transactionId = transactionData[0];
-                String user = transactionData[1];
-                String paymentMethod = transactionData[2];
-                String transactionType = transactionData[3];
-                BigDecimal amount = new BigDecimal(transactionData[4]);
-                Date transactionDate = dateFormat.parse(transactionData[5]);
-                String fileStatus = transactionData[6];
-
-                if (user.equals(userId)) { // Chỉ lọc theo userId, không lọc theo status
-                    transactions.add(new Transaction(transactionId, user, paymentMethod, transactionType, amount, transactionDate, fileStatus));
-                }
-            }
-        } catch (IOException | ParseException e) {
+            return reader.lines()
+                    .map(line -> line.split(","))
+                    .filter(transactionData -> transactionData[1].equals(userId) && transactionData[6].equals(status))
+                    .map(transactionData -> {
+                        try {
+                            Date transactionDate = dateFormat.parse(transactionData[5]);
+                            BigDecimal amount = new BigDecimal(transactionData[4]);
+                            return new Transaction(transactionData[0], transactionData[1], transactionData[2],
+                                    transactionData[3], amount, transactionDate, transactionData[6]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
             e.printStackTrace();
         }
+        return Collections.emptyList();
+    }
 
-        return transactions;
+    private List<Transaction> getTransactionsByUserId(String userId) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_FILE))) {
+            return reader.lines()
+                    .map(line -> line.split(","))
+                    .filter(transactionData -> transactionData[1].equals(userId))
+                    .map(transactionData -> {
+                        try {
+                            Date transactionDate = dateFormat.parse(transactionData[5]);
+                            BigDecimal amount = new BigDecimal(transactionData[4]);
+                            return new Transaction(transactionData[0], transactionData[1], transactionData[2],
+                                    transactionData[3], amount, transactionDate, transactionData[6]);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     public void displayFinancialReport(String userId) {
@@ -163,17 +215,12 @@ public class TransactionServiceImpl implements TransactionService {
     private void displayTotalAmountByPaymentMethod(String userId, String status) {
         List<Transaction> transactions = getTransactionsByUserAndStatus(userId, status);
 
-        Map<String, BigDecimal> totalAmountByMethod = new HashMap<>();
-        for (Transaction t : transactions) {
-            totalAmountByMethod.put(
-                    t.getPaymentMethod(),
-                    totalAmountByMethod.getOrDefault(t.getPaymentMethod(), BigDecimal.ZERO).add(t.getAmount())
-            );
-        }
+        Map<String, BigDecimal> totalAmountByMethod = transactions.stream()
+                .collect(Collectors.groupingBy(Transaction::getPaymentMethod,
+                        Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)));
+
         System.out.println("\n🔹 Total Amount by Payment Method:");
-        for (Map.Entry<String, BigDecimal> entry : totalAmountByMethod.entrySet()) {
-            System.out.printf(" - %s: %.2f\n", entry.getKey(), entry.getValue());
-        }
+        totalAmountByMethod.forEach((method, amount) -> System.out.printf(" - %s: %.2f\n", method, amount));
     }
 
     private void displayTransactionStatusCount(String userId) {
@@ -200,29 +247,18 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         System.out.println("\n⚠️ Suspicious Transactions:");
-        for (Transaction t : suspiciousTransactions) {
-            System.out.println(" - " + t);
-        }
+        suspiciousTransactions.forEach(t -> System.out.println(" - " + t));
     }
 
     private void displayMonthlyReport(String userId, String status) {
         List<Transaction> transactions = getTransactions(userId, status);
 
-        Map<String, BigDecimal> totalAmountByMonth = new HashMap<>();
-        SimpleDateFormat monthFormat = new SimpleDateFormat("yyyy-MM");
-
-        for (Transaction t : transactions) {
-            String monthYear = monthFormat.format(t.getDate()); // Format Date to "YYYY-MM"
-            totalAmountByMonth.put(
-                    monthYear,
-                    totalAmountByMonth.getOrDefault(monthYear, BigDecimal.ZERO).add(t.getAmount())
-            );
-        }
+        Map<String, BigDecimal> totalAmountByMonth = transactions.stream()
+                .collect(Collectors.groupingBy(t -> new SimpleDateFormat("yyyy-MM").format(t.getDate()),
+                        Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)));
 
         System.out.println("\n📅 Monthly Financial Report:");
-        for (Map.Entry<String, BigDecimal> entry : totalAmountByMonth.entrySet()) {
-            System.out.printf(" - %s: %.2f\n", entry.getKey(), entry.getValue());
-        }
+        totalAmountByMonth.forEach((month, amount) -> System.out.printf(" - %s: %.2f\n", month, amount));
     }
 
 }

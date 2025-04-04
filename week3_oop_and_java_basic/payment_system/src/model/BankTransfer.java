@@ -28,6 +28,7 @@ public class BankTransfer extends PaymentMethod {
         if (finalAmount.compareTo(balance) > 0) {
             return false;
         }
+        lastBalance = balance;
         balance = balance.subtract(finalAmount);
         return true;
     }

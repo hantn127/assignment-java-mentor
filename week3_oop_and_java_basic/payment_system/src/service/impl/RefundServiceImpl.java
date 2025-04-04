@@ -9,7 +9,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.IntStream;
 
 public class RefundServiceImpl implements RefundService {
     private static final String PAYMENT_METHOD_FILE = "week3_oop_and_java_basic/payment_system/src/data/payment_methods.txt";
@@ -36,40 +39,40 @@ public class RefundServiceImpl implements RefundService {
         return transactionService.getTransactions(userId, status);
     }
 
-    private PaymentMethod getPaymentMethod(String method) {
+    private Optional<PaymentMethod> getPaymentMethod(String method) {
         try (BufferedReader br = new BufferedReader(new FileReader(PAYMENT_METHOD_FILE))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 4) {
-                    String methodId = parts[0].trim();
-                    String storedMethod = parts[1].trim();
-                    String storedUserId = parts[2].trim();
-                    BigDecimal balance = new BigDecimal(parts[3].trim());
+            return br.lines()
+                    .map(line -> line.split(","))
+                    .filter(parts -> parts.length == 4 && parts[1].trim().equalsIgnoreCase(method))
+                    .map(parts -> {
+                        String methodId = parts[0].trim();
+                        String storedMethod = parts[1].trim();
+                        String storedUserId = parts[2].trim();
+                        BigDecimal balance = new BigDecimal(parts[3].trim());
 
-                    if (storedMethod.equalsIgnoreCase(method)) {
-                        switch (method) {
+                        switch (storedMethod) {
                             case "BankTransfer":
                                 return new BankTransfer(methodId, storedMethod, storedUserId, balance);
                             case "CreditCard":
                                 return new CreditCard(methodId, storedMethod, storedUserId, balance);
                             case "EWallet":
                                 return new EWallet(methodId, storedMethod, storedUserId, balance);
+                            default:
+                                return null;
                         }
-                    }
-                }
-            }
+                    })
+                    .filter(Objects::nonNull) // Filter out null results
+                    .findFirst(); // Return the first match (if any)
         } catch (IOException | NumberFormatException e) {
             System.out.println("Lỗi khi đọc phương thức thanh toán: " + e.getMessage());
         }
-        return null;
+        return Optional.empty(); // Return an empty optional if no match
     }
 
     private int showRefundableTransactions(List<Transaction> refundableTransactions) {
         System.out.println("Danh sách giao dịch có thể hoàn tiền:");
-        for (int i = 0; i < refundableTransactions.size(); i++) {
-            System.out.println((i + 1) + ". " + refundableTransactions.get(i));
-        }
+        IntStream.range(0, refundableTransactions.size())
+                .forEach(i -> System.out.println((i + 1) + ". " + refundableTransactions.get(i)));
 
         System.out.print("Chọn giao dịch cần hoàn tiền (nhập số thứ tự): ");
         int choice = scanner.nextInt();
@@ -81,12 +84,11 @@ public class RefundServiceImpl implements RefundService {
         }
     }
 
-
     private void processRefundWithMethod(String userId, String method, BigDecimal amount) {
-        PaymentMethod paymentMethod = getPaymentMethod(method);
+        Optional<PaymentMethod> paymentMethod = getPaymentMethod(method);
 
-        if (paymentMethod != null) {
-            boolean transactionSuccessful = paymentMethod.processRefund(amount);
+        if (paymentMethod.isPresent()) {
+            boolean transactionSuccessful = paymentMethod.get().processRefund(amount);
 
             if (transactionSuccessful) {
                 System.out.println("Hoàn tiền thành công bằng phương thức " + method);

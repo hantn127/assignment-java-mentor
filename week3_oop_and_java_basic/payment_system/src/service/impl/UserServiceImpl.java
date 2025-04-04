@@ -1,15 +1,16 @@
 package service.impl;
 
-import model.BankTransfer;
-import model.CreditCard;
-import model.EWallet;
 import model.User;
 import service.UserService;
 import constance.UserStatus;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UserServiceImpl implements UserService {
     private final Map<String, User> users = new HashMap<>();
@@ -41,53 +42,63 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUserFromFile(String username) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 7) {
-                    String userId = parts[0];
-                    String uname = parts[1];
-                    String password = parts[2];
-                    UserStatus status = UserStatus.valueOf(parts[3]);
-                    BigDecimal balance = new BigDecimal(parts[4]);
-                    int failedLoginAttempts = Integer.parseInt(parts[5]);
-                    int failedOtpAttempts = Integer.parseInt(parts[6]);
-
-                    if (uname.equals(username)) {
-                        return new User(userId, uname, password, status, balance, failedLoginAttempts, failedOtpAttempts);
-                    }
-                }
-            }
+        try (Stream<String> lines = Files.lines(Paths.get(USER_FILE))) {
+            return lines.map(line -> line.split(","))
+                    .filter(parts -> parts.length >= 7 && parts[1].equals(username))
+                    .map(parts -> new User(
+                            parts[0], parts[1], parts[2],
+                            UserStatus.valueOf(parts[3]),
+                            new BigDecimal(parts[4]),
+                            Integer.parseInt(parts[5]),
+                            Integer.parseInt(parts[6])
+                    ))
+                    .findFirst()
+                    .orElse(null);
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
+    }
+
+    private void updateUserInFile(User updatedUser) {
+        try {
+            List<String> updatedLines = Files.lines(Paths.get(USER_FILE))
+                    .map(line -> {
+                        String[] parts = line.split(",");
+                        if (parts[0].equals(updatedUser.getUserId())) {
+                            return String.format("%s,%s,%s,%s,%s,%d,%d",
+                                    updatedUser.getUserId(), updatedUser.getUsername(),
+                                    updatedUser.getPassword(), updatedUser.getStatus(),
+                                    updatedUser.getBalance(), updatedUser.getFailedLoginAttempts(),
+                                    updatedUser.getFailedOtpAttempts());
+                        }
+                        return line;
+                    })
+                    .collect(Collectors.toList());
+
+            Files.write(Paths.get(USER_FILE), updatedLines);
+        } catch (IOException e) {
+            System.out.println("Lỗi khi ghi file: " + e.getMessage());
+        }
     }
 
     private User getUserById(String userId) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 7) {
-                    String uId = parts[0];
-                    String uname = parts[1];
-                    String password = parts[2];
-                    UserStatus status = UserStatus.valueOf(parts[3]);
-                    BigDecimal balance = new BigDecimal(parts[4]);
-                    int failedLoginAttempts = Integer.parseInt(parts[5]);
-                    int failedOtpAttempts = Integer.parseInt(parts[6]);
-
-                    if (uId.equals(userId)) {
-                        return new User(userId, uname, password, status, balance, failedLoginAttempts, failedOtpAttempts);
-                    }
-                }
-            }
+        try (Stream<String> lines = Files.lines(Paths.get(USER_FILE))) {
+            return lines.map(line -> line.split(","))
+                    .filter(parts -> parts.length >= 7 && parts[0].equals(userId))
+                    .map(parts -> new User(
+                            parts[0], parts[1], parts[2],
+                            UserStatus.valueOf(parts[3]),
+                            new BigDecimal(parts[4]),
+                            Integer.parseInt(parts[5]),
+                            Integer.parseInt(parts[6])
+                    ))
+                    .findFirst()
+                    .orElse(null);
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -135,48 +146,6 @@ public class UserServiceImpl implements UserService {
         System.out.println("- Đăng nhập từ địa chỉ IP 192.168.1.1 vào lúc 2025-03-06");
     }
 
-    private void updateUserInFile(User updatedUser) {
-        List<User> users = readUsersFromFile();
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USER_FILE))) {
-            for (User user : users) {
-                if (user.getUserId().equals(updatedUser.getUserId())) {
-                    user = updatedUser;
-                }
-                writer.write(user.getUserId() + "," + user.getUsername() + "," + user.getPassword() + "," +
-                        user.getStatus() + "," + user.getBalance() + "," + user.getFailedLoginAttempts() + "," + user.getFailedOtpAttempts());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Lỗi khi ghi file: " + e.getMessage());
-        }
-    }
-
-    private List<User> readUsersFromFile() {
-        List<User> users = new ArrayList<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 7) {
-                    users.add(new User(
-                            parts[0],
-                            parts[1],
-                            parts[2],
-                            UserStatus.valueOf(parts[3]),
-                            new BigDecimal(parts[4]),
-                            Integer.parseInt(parts[5]),
-                            Integer.parseInt(parts[6])
-                    ));
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Lỗi khi đọc file: " + e.getMessage());
-        }
-        return users;
-    }
-
     private void handleFailedLogin(User user) {
         if (user.getFailedLoginAttempts() >= MAX_FAILED_LOGIN_ATTEMPTS) {
             user.setStatus(UserStatus.SUSPENDED);
@@ -192,6 +161,5 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
-
 
 }
